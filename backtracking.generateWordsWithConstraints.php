@@ -1,15 +1,18 @@
 <?php
 
 $word = '';
+$GLOBALS['totalWords'] = 0;
 $letters = 'abcdefghijklmnopqrstuvwxyz';
 
 generateWordsWithConstraints($word, $letters);
+echo PHP_EOL.'Found '.$GLOBALS['totalWords'].' words.'.PHP_EOL;
 
 function generateWordsWithConstraints($word, $letters)
 {
     //echo 'Current word: '.$word.PHP_EOL;
     if (strlen($word) == 4) {
         echo ' '.$word;
+        ++$GLOBALS['totalWords'];
     } else {
         for ($i = 0; $i < strlen($letters); ++$i) {
             $newWord = $word.$letters[$i];
@@ -33,6 +36,7 @@ function condition1($word)
 {
     return vowel($word[0]);
 }
+
 function vowel($letter)
 {
     if ($letter != 'a'
@@ -69,18 +73,37 @@ function condition3($word)
 {
     $ret = true;
 
-    for ($i=0; $i < strlen($word); $i++) {
-        
+    if (strlen($word) >= 3) {
+        for ($i = 2; $i < strlen($word); ++$i) {
+            if (vowel($word[$i])
+            and vowel($word[$i - 1])
+            and vowel($word[$i - 2])) {
+                $ret = false;
+            }
+            if (!vowel($word[$i])
+            and !vowel($word[$i - 1])
+            and !vowel($word[$i - 2])) {
+                $ret = false;
+            }
+        }
     }
 
     return $ret;
 }
 
-// Group of pairs that cannot be in a row.
-function condition4()
+// Group of pairs of consonants that cannot be in a row.
+function condition4($word)
 {
-    $C = array('bc', 'cd', 'df');
+    $C = array('bc', 'cd', 'df', 'fg', 'gh', 'hi', 'ij', 'jk', 'kl', 'lm', 'mn', 'no', 'op', 'pq', 'qr', 'rs', 'st', 'tu', 'uv', 'vw', 'wx', 'xy', 'yz');
     $ret = true;
+
+    if (strlen($word) >= 3) {
+        for ($i = 1; $i < strlen($word); ++$i) {
+            if (in_array($word[$i].$word[$i - 1], $C)) {
+                $ret = false;
+            }
+        }
+    }
 
     return $ret;
 }

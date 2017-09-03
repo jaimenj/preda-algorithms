@@ -1,6 +1,10 @@
 <?php
 
-define('N', 4);
+define('N', 3);
+define('WAIT_TIME', 3);
+define('TRACE', true);
+$GLOBALS['TOTAL_SOLUTIONS'] = 0;
+$GLOBALS['SOLUTIONS'] = array();
 $square = array();
 for ($i = 0; $i < N; ++$i) {
     for ($j = 0; $j < N; ++$j) {
@@ -8,61 +12,54 @@ for ($i = 0; $i < N; ++$i) {
     }
 }
 
-echo 'NxN latin square with N='.N.PHP_EOL;
-writeToScreen($square);
-
-echo 'Starting filling colors..'.PHP_EOL;
+echo 'NxN latin square with N='.N.'. Let\'s start filling with colors..'.PHP_EOL;
 latinSquare($square, 1);
+echo 'Total solutions found: '.$GLOBALS['TOTAL_SOLUTIONS'].PHP_EOL;
 
 function latinSquare($square, $color)
 {
-    for ($i = 0; $i < N; ++$i) {
-        for ($j = 0; $j < N; ++$j) {
-            if ($square[$i][$j] == 0) {
-                $square[$i][$j] = $color;
+    if (TRACE) {
+        echo '---> latingSquare! Filling square with $color='.$color.PHP_EOL;
+    }
 
-                echo '---> latingSquare!'.PHP_EOL;
-                writeToScreen($square);
-
-                sleep(3);
-
-                if (possible($square)) {
-                    echo 'Possible.'.PHP_EOL;
-                    if (isSolution($square)) {
-                        echo '=====>> SOLUTION FOUND!'.PHP_EOL;
-                        writeToScreen($square);
-                    } else {
-                        echo 'Not solution.'.PHP_EOL;
-                        if (completable($square) and $color < N) {
-                            echo 'Completable.'.PHP_EOL;
-                            latinSquare($square, $color + 1);
-                        } else {
-                            echo 'Not completable.'.PHP_EOL;
-                        }
-                    }
-                } else {
-                    echo 'Not possible.'.PHP_EOL;
+    foreach (completions($square, $color) as $possibleSolution) {
+        if (possible($possibleSolution)) {
+            if (isSolution($possibleSolution)) { // Procces solution..
+                if (TRACE) {
+                    echo '=====>> SOLUTION FOUND!'.PHP_EOL;
+                    writeToScreen($possibleSolution);
+                    sleep(WAIT_TIME);
                 }
-
-                //$square[$i][$j] = 0;
+                ++$GLOBALS['TOTAL_SOLUTIONS'];
+                $GLOBALS['SOLUTIONS'][] = $possibleSolution;
+            } else {
+                if (completable($possibleSolution)) {
+                    if ($color + 1 <= N) {
+                        latinSquare($possibleSolution, $color + 1);
+                    }
+                }
             }
         }
     }
 }
 
-function isSolution($square)
+function writeToScreen($square)
 {
     for ($i = 0; $i < N; ++$i) {
         for ($j = 0; $j < N; ++$j) {
-            if ($square[$i][$j] == 0) {
-                return false;
-            }
+            echo str_pad($square[$i][$j], 3, ' ', STR_PAD_BOTH);
         }
+        echo PHP_EOL;
     }
-
-    return true;
 }
 
+// Only check if it doesn't have any 0s.
+function isSolution($square)
+{
+    return !completable($square);
+}
+
+// Check if it has any 0s.
 function completable($square)
 {
     for ($i = 0; $i < N; ++$i) {
@@ -76,6 +73,7 @@ function completable($square)
     return false;
 }
 
+// Check if it has the same color in any row or col.
 function possible($square)
 {
     for ($i = 0; $i < N; ++$i) {
@@ -109,12 +107,36 @@ function possible($square)
     return true;
 }
 
-function writeToScreen($square)
+// Fill squares with colors and return array with all possible fillings.
+function completions($square, $color)
 {
-    for ($i = 0; $i < N; ++$i) {
-        for ($j = 0; $j < N; ++$j) {
-            echo str_pad($square[$i][$j], 3, ' ', STR_PAD_BOTH);
+    $completions = array();
+
+    for ($j = 0; $j < N; ++$j) {
+        if ($square[0][$j] == 0) {
+            $square[0][$j] = $color;
+
+            completionsRecursive($completions, $square, $color, 1);
+
+            $square[0][$j] = 0;
         }
-        echo PHP_EOL;
+    }
+
+    return $completions;
+}
+function completionsRecursive(&$completions, $square, $color, $row)
+{
+    for ($j = 0; $j < N; ++$j) {
+        if ($square[$row][$j] == 0) {
+            $square[$row][$j] = $color;
+            if (possible($square)) {
+                if ($row + 1 < N) {
+                    completionsRecursive($completions, $square, $color, $row + 1);
+                } else {
+                    $completions[] = $square;
+                }
+            }
+            $square[$row][$j] = 0;
+        }
     }
 }

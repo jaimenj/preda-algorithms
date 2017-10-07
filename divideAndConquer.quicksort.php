@@ -1,18 +1,22 @@
 <?php
 
-define('SIZE_OF_ARRAY', 10);
+define('SIZE_OF_ARRAY', 30);
+define('TRACE', true);
+define('WAIT_TIME', 0);
+
 $theArray = array();
 for ($i = 0; $i < SIZE_OF_ARRAY; ++$i) {
     $theArray[$i] = rand(0, 9);
 }
 
-echo 'Initial array:     '.implode('-', $theArray).PHP_EOL;
+$initialArray = $theArray;
 $theArray = quicksort($theArray);
+echo 'Initial array:     '.implode('-', $initialArray).PHP_EOL;
 echo 'Final array:       '.implode('-', $theArray).PHP_EOL;
 
 function quicksort($theArray)
 {
-    echo '>> quicksorting:   '.implode('-', $theArray).PHP_EOL;
+    printToScreen('>> quicksorting', $theArray, '');
 
     $positionPivot = 0;
     if (count($theArray) <= 1) {
@@ -20,8 +24,7 @@ function quicksort($theArray)
     } else {
         pivoting($theArray, $positionPivot);
 
-        echo '>> after pivoting: '.implode('-', $theArray).' pivot='.$positionPivot.PHP_EOL;
-        sleep(3);
+        printToScreen('>> after pivoting', $theArray, 'pivot='.$positionPivot);
 
         $nItems1 = $positionPivot;
         $array1 = quicksort(array_slice($theArray, 0, $nItems1));
@@ -30,16 +33,14 @@ function quicksort($theArray)
 
         return array_merge($array1, array($theArray[$positionPivot]), $array2);
     }
-
-    sleep(3);
 }
 
 function pivoting(&$theArray, &$positionPivot)
 {
-    echo '>> pivoting:       '.implode('-', $theArray).PHP_EOL;
-    sleep(3);
-
     $p = $theArray[0];
+
+    printToScreen('>> pivoting', $theArray, 'using pivot [0]='.$p);
+
     $k = 0;
     $l = count($theArray);
 
@@ -56,8 +57,7 @@ function pivoting(&$theArray, &$positionPivot)
         $theArray[$k] = $theArray[$l];
         $theArray[$l] = $aux;
 
-        echo '>> pivoting:       '.implode('-', $theArray).PHP_EOL;
-        sleep(3);
+        printToScreen('>> pivoting', $theArray, 'changed ['.$k.'] with ['.$l.']');
 
         do {
             ++$k;
@@ -72,8 +72,17 @@ function pivoting(&$theArray, &$positionPivot)
     $theArray[0] = $theArray[$l];
     $theArray[$l] = $aux;
 
-    echo '>> pivoting:       '.implode('-', $theArray).PHP_EOL;
-    sleep(3);
+    printToScreen('>> pivoting', $theArray, 'changed [0] with ['.$l.']');
 
     $positionPivot = $l;
+}
+
+function printToScreen($preStr, $theArray, $postStr)
+{
+    echo str_pad($preStr, 20, ' ');
+    foreach ($theArray as $item) {
+        echo str_pad($item, 3, ' ');
+    }
+    echo $postStr.PHP_EOL;
+    sleep(WAIT_TIME);
 }

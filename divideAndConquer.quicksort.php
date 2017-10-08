@@ -79,10 +79,12 @@ function pivoting(&$theArray, &$positionPivot)
 
 function printToScreen($preStr, $theArray, $postStr)
 {
-    echo str_pad($preStr, 20, ' ');
-    foreach ($theArray as $item) {
-        echo str_pad($item, 3, ' ');
+    if (TRACE) {
+        echo str_pad($preStr, 20, ' ');
+        foreach ($theArray as $item) {
+            echo str_pad($item, 3, ' ');
+        }
+        echo $postStr.PHP_EOL;
+        sleep(WAIT_TIME);
     }
-    echo $postStr.PHP_EOL;
-    sleep(WAIT_TIME);
 }

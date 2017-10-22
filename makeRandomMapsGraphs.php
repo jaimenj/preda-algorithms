@@ -4,7 +4,6 @@
  * a position to an adjacent is are the posible movements. Then, is calculated an adjacent matrix
  * to represent the graph of possible movements from each box.
  */
-
 define('NUMBER_OF_ROWS', 6);
 define('NUMBER_OF_COLS', 6);
 define('NUMBER_OF_NODES', NUMBER_OF_ROWS * NUMBER_OF_COLS);
@@ -57,6 +56,28 @@ for ($row = 0; $row < NUMBER_OF_ROWS; ++$row) {
     echo str_pad($row, 3, ' ').'|  ';
     for ($col = 0; $col < NUMBER_OF_COLS; ++$col) {
         echo str_pad($randomMap[$row][$col], 3, ' ');
+    }
+    echo PHP_EOL;
+}
+
+// Print map positions.
+$currentPosition = 0;
+echo PHP_EOL;
+echo '   |  ';
+for ($col = 0; $col < NUMBER_OF_COLS; ++$col) {
+    echo str_pad($col, 3, ' ');
+}
+echo PHP_EOL;
+echo '------';
+for ($col = 0; $col < NUMBER_OF_COLS; ++$col) {
+    echo '---';
+}
+echo PHP_EOL;
+for ($row = 0; $row < NUMBER_OF_ROWS; ++$row) {
+    echo str_pad($row, 3, ' ').'|  ';
+    for ($col = 0; $col < NUMBER_OF_COLS; ++$col) {
+        echo str_pad($currentPosition, 3, ' ');
+        ++$currentPosition;
     }
     echo PHP_EOL;
 }

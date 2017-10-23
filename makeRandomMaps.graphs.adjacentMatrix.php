@@ -1,8 +1,8 @@
 <?php
 /**
  * This script makes a random map filled with costs of walking throw each box. Moving from
- * a position to an adjacent is are the posible movements. Then, is calculated an adjacent matrix
- * to represent the graph of possible movements from each box.
+ * a position to an adjacent are the only possible movements. Then, is calculated an adjacent matrix
+ * to represent the graph.
  */
 define('NUMBER_OF_ROWS', 6);
 define('NUMBER_OF_COLS', 6);

@@ -1,109 +1,118 @@
 <?php
 
-define('NUMBER_OF_NODES', 5);
-define('TRACE', true);
-define('WAIT_TIME', 1);
-define('NINF', 100);
+define('NUMBER_OF_NODES', 7);
+define('NUMBER_OF_EDGES_PER_NODE', 2);
+define('IS_DIRECTED_GRAPH', true);
 
-$graph[NUMBER_OF_NODES - 1] = array();
-fillRandomCosts($graph);
-printToScreen($graph);
+$adjacentList = array();
+fillRandomCosts($adjacentList);
+printToScreen($adjacentList);
 
-$special = $ancestor = array();
-dijkstra($graph, $special, $ancestor);
-echo 'Special: '.implode('-', $special).PHP_EOL
-    .'Ancestor: '.implode('-', $ancestor).PHP_EOL;
+$special = $predecessor = array();
+dijkstra($adjacentList, $special, $predecessor);
+echo 'FINAL> Special: '.implode('-', $special).PHP_EOL
+    .'FINAL> Predecessor: '.implode('-', $predecessor).PHP_EOL;
 
-function dijkstra($graph, &$special, &$ancestor)
+function dijkstra($adjacentList, &$special, &$predecessor)
 {
-    $notUsedNodes = array();
+    // Fill C with not used nodes.
+    $C = array();
     for ($i = 1; $i < NUMBER_OF_NODES; ++$i) {
-        $notUsedNodes[] = $i;
-        if ($graph[0][$i] == 0) {
-            $special[$i] = NINF;
-        } else {
-            $special[$i] = $graph[0][$i];
-        }
-        $ancestor[$i] = 0;
+        $C[] = $i;
     }
-    while (count($notUsedNodes) > 1) {
-        echo 'Not used nodes: '.implode('-', $notUsedNodes).PHP_EOL;
-        echo 'Special: '.implode('-', $special).PHP_EOL;
-        echo 'Ancestor: '.implode('-', $ancestor).PHP_EOL;
 
-        $v = selectNextV($graph, $notUsedNodes, $special, $ancestor);
-        $notUsedNodes = deleteValue($notUsedNodes, $v);
+    // Fill special distances.
+    for ($i = 1; $i < NUMBER_OF_NODES; ++$i) {
+        $special[$i] = distanceFromTo($adjacentList, 0, $i);
+        if ($special[$i] < INF) {
+            $predecessor[$i] = 0;
+        } else {
+            $predecessor[$i] = '#';
+        }
+    }
+    echo 'INITIAL> Not used nodes: '.implode('-', $C).PHP_EOL
+        .'INITIAL> Special: '.implode('-', $special).PHP_EOL
+        .'INITIAL> Predecessor: '.implode('-', $predecessor).PHP_EOL;
+
+    // Study nodes in C to update $special and predecessor vectors.
+    while (count($C) > 1) {
+        $v = selectNextNodeThatMinimizesSpecial($adjacentList, $C, $special);
+        $C = array_diff($C, array($v));
 
         if ($v == -1) {
-            echo 'Cannot achieve all nodes!'.PHP_EOL;
+            echo 'IMPOSSIBLE TO FIND DIJKSTRA WITH ALL NODES! Cannot achieve all nodes!'.PHP_EOL;
             exit;
         }
 
-        foreach ($notUsedNodes as $w) {
-            if ($special[$w] > $special[$v] + $graph[$v][$w]
-            and $graph[$v][$w] < NINF
-            and $special[$w] < NINF) {
-                $special[$w] = $special[$v] + $graph[$v][$w];
-                $ancestor[$w] = $v;
+        foreach ($C as $w) {
+            if ($special[$w] > $special[$v] + distanceFromTo($adjacentList, $v, $w)) {
+                $special[$w] = $special[$v] + distanceFromTo($adjacentList, $v, $w);
+                $predecessor[$w] = $v;
             }
         }
-        sleep(WAIT_TIME);
-        //exit;
+
+        echo 'Not used nodes: '.implode('-', $C).PHP_EOL
+            .'Special: '.implode('-', $special).PHP_EOL
+            .'Predecessor: '.implode('-', $predecessor).PHP_EOL;
     }
 }
 
-// Finds node with lowes distance and returns it
-function selectNextV($graph, &$notUsedNodes, &$special, &$ancestor)
+function selectNextNodeThatMinimizesSpecial($adjacentList, &$C, &$special)
 {
-    $minCost = NINF;
+    $minCost = INF;
     $minNode = -1;
 
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
-        foreach ($notUsedNodes as $node) {
-            if (!in_array($i, $notUsedNodes)
-            and $graph[$i][$node] < $minCost
-            and $graph[$i][$node] < NINF) {
-                echo '>>>> Found! $graph['.$i.']['.$node.']='.$graph[$i][$node].PHP_EOL;
-                $minCost = $graph[$i][$node];
+        foreach ($C as $node) {
+            if (!in_array($i, $C)
+            and isset($adjacentList[$i][$node])
+            and $adjacentList[$i][$node] < $minCost) {
+                echo '>>>> Found min edge! $adjacentList['.$i.']['.$node.']='.$adjacentList[$i][$node].PHP_EOL;
+                $minCost = $adjacentList[$i][$node];
                 $minNode = $node;
-                $ancestor[$node] = $i;
             }
         }
     }
 
-    echo '>>>> Next min node is '.$minNode.PHP_EOL;
+    echo '>>>> Next min node to use is '.$minNode.PHP_EOL;
 
     return $minNode;
 }
 
-function deleteValue($notUsedNodes, $v)
+function distanceFromTo($adjacentList, $from, $to)
 {
-    return array_diff($notUsedNodes, array($v));
+    if (isset($adjacentList[$from][$to])) {
+        return $adjacentList[$from][$to];
+    } else {
+        return INF;
+    }
 }
 
-function fillRandomCosts(&$graph)
+function fillRandomCosts(&$adjacentList)
 {
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
-        $graph[$i][$i] = NINF;
-    }
-    for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
-        for ($j = $i + 1; $j < NUMBER_OF_NODES; ++$j) {
-            $graph[$i][$j] = rand(0, 5);
-            if ($graph[$i][$j] < 3) {
-                $graph[$i][$j] = NINF;
-            }
-            $graph[$j][$i] = rand(0, 3);
-            if ($graph[$j][$i] < 3) {
-                $graph[$j][$i] = NINF;
+        $added = false;
+        while (!$added) {
+            for ($j = 0; $j < NUMBER_OF_EDGES_PER_NODE; ++$j) {
+                $adjacentNode = rand(0, NUMBER_OF_NODES - 1);
+                if ($adjacentNode != $i and $adjacentNode != $j) {
+                    $adjacentNodeCost = rand(1, 5);
+                    $adjacentList[$i][$adjacentNode] = $adjacentNodeCost;
+                    if (!IS_DIRECTED_GRAPH) {
+                        $adjacentList[$adjacentNode][$i] = $adjacentNodeCost;
+                    }
+                    $added = true;
+                }
             }
         }
     }
 }
-function printToScreen($graph)
+function printToScreen($adjacentList)
 {
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
-        for ($j = 0; $j < NUMBER_OF_NODES; ++$j) {
-            echo str_pad($graph[$i][$j], 4, ' ');
+        echo $i;
+        foreach ($adjacentList[$i] as $key => $value) {
+            echo ' --> '.$key.'('.$value.')';
         }
         echo PHP_EOL;
     }

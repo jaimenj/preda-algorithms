@@ -1,20 +1,20 @@
 <?php
 
-define('NUMBER_OF_NODES', 7);
+define('NUMBER_OF_NODES', 17);
 define('INITIAL_NODE', 3);
-define('NUMBER_OF_EDGES_PER_NODE', 2);
+define('NUMBER_OF_EDGES_PER_NODE', 3);
 define('IS_DIRECTED_GRAPH', true);
 
-$adjacentList = array();
-fillRandomCosts($adjacentList);
-printToScreen($adjacentList);
+$adjacencyList = array();
+fillRandomCosts($adjacencyList);
+printToScreen($adjacencyList);
 
 $special = $predecessor = array();
-dijkstra($adjacentList, $special, $predecessor);
+dijkstra($adjacencyList, $special, $predecessor);
 echo 'FINAL> Special: '.implode('-', $special).PHP_EOL
     .'FINAL> Predecessor: '.implode('-', $predecessor).PHP_EOL;
 
-function dijkstra($adjacentList, &$special, &$predecessor)
+function dijkstra($adjacencyList, &$special, &$predecessor)
 {
     // Fill C with not used nodes.
     $C = array();
@@ -27,7 +27,7 @@ function dijkstra($adjacentList, &$special, &$predecessor)
     // Fill special distances.
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
         if ($i != INITIAL_NODE) {
-            $special[$i] = distanceFromTo($adjacentList, INITIAL_NODE, $i);
+            $special[$i] = distanceFromTo($adjacencyList, INITIAL_NODE, $i);
             if ($special[$i] < INF) {
                 $predecessor[$i] = INITIAL_NODE;
             } else {
@@ -45,7 +45,7 @@ function dijkstra($adjacentList, &$special, &$predecessor)
 
     // Study nodes in C to update $special and predecessor vectors.
     while (count($C) > 1) {
-        $v = selectNextNodeThatMinimizesSpecial($adjacentList, $C, $special);
+        $v = selectNextNodeThatMinimizesSpecial($adjacencyList, $C, $special);
         $C = array_diff($C, array($v));
 
         if ($v == -1) {
@@ -54,8 +54,8 @@ function dijkstra($adjacentList, &$special, &$predecessor)
         }
 
         foreach ($C as $w) {
-            if ($special[$w] > $special[$v] + distanceFromTo($adjacentList, $v, $w)) {
-                $special[$w] = $special[$v] + distanceFromTo($adjacentList, $v, $w);
+            if ($special[$w] > $special[$v] + distanceFromTo($adjacencyList, $v, $w)) {
+                $special[$w] = $special[$v] + distanceFromTo($adjacencyList, $v, $w);
                 $predecessor[$w] = $v;
             }
         }
@@ -66,19 +66,19 @@ function dijkstra($adjacentList, &$special, &$predecessor)
     }
 }
 
-function selectNextNodeThatMinimizesSpecial($adjacentList, &$C, &$special)
+function selectNextNodeThatMinimizesSpecial($adjacencyList, &$C, &$special)
 {
     $minCost = INF;
     $minNode = -1;
 
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
         foreach ($C as $node) {
-            //echo $node.' '.$adjacentList[$i][$node].PHP_EOL;
+            //echo $node.' '.$adjacencyList[$i][$node].PHP_EOL;
                 if (!in_array($i, $C)
-                and isset($adjacentList[$i][$node])
-                and $adjacentList[$i][$node] < $minCost) {
-                    echo '>>>> Found min edge! $adjacentList['.$i.']['.$node.']='.$adjacentList[$i][$node].PHP_EOL;
-                    $minCost = $adjacentList[$i][$node];
+                and isset($adjacencyList[$i][$node])
+                and $adjacencyList[$i][$node] < $minCost) {
+                    echo '>>>> Found min edge! $adjacencyList['.$i.']['.$node.']='.$adjacencyList[$i][$node].PHP_EOL;
+                    $minCost = $adjacencyList[$i][$node];
                     $minNode = $node;
                 }
         }
@@ -89,16 +89,16 @@ function selectNextNodeThatMinimizesSpecial($adjacentList, &$C, &$special)
     return $minNode;
 }
 
-function distanceFromTo($adjacentList, $from, $to)
+function distanceFromTo($adjacencyList, $from, $to)
 {
-    if (isset($adjacentList[$from][$to])) {
-        return $adjacentList[$from][$to];
+    if (isset($adjacencyList[$from][$to])) {
+        return $adjacencyList[$from][$to];
     } else {
         return INF;
     }
 }
 
-function fillRandomCosts(&$adjacentList)
+function fillRandomCosts(&$adjacencyList)
 {
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
         $added = false;
@@ -107,21 +107,22 @@ function fillRandomCosts(&$adjacentList)
                 $adjacentNode = rand(0, NUMBER_OF_NODES - 1);
                 if ($adjacentNode != $i and $adjacentNode != $j) {
                     $adjacentNodeCost = rand(1, 5);
-                    $adjacentList[$i][$adjacentNode] = $adjacentNodeCost;
+                    $adjacencyList[$i][$adjacentNode] = $adjacentNodeCost;
                     if (!IS_DIRECTED_GRAPH) {
-                        $adjacentList[$adjacentNode][$i] = $adjacentNodeCost;
+                        $adjacencyList[$adjacentNode][$i] = $adjacentNodeCost;
                     }
                     $added = true;
                 }
             }
         }
+        ksort($adjacencyList[$i]);
     }
 }
-function printToScreen($adjacentList)
+function printToScreen($adjacencyList)
 {
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
         echo $i;
-        foreach ($adjacentList[$i] as $key => $value) {
+        foreach ($adjacencyList[$i] as $key => $value) {
             echo ' --> '.$key.'('.$value.')';
         }
         echo PHP_EOL;

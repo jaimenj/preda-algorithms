@@ -1,6 +1,7 @@
 <?php
 
 define('NUMBER_OF_NODES', 7);
+define('INITIAL_NODE', 3);
 define('NUMBER_OF_EDGES_PER_NODE', 2);
 define('IS_DIRECTED_GRAPH', true);
 
@@ -17,20 +18,28 @@ function dijkstra($adjacentList, &$special, &$predecessor)
 {
     // Fill C with not used nodes.
     $C = array();
-    for ($i = 1; $i < NUMBER_OF_NODES; ++$i) {
-        $C[] = $i;
+    for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
+        if ($i != INITIAL_NODE) {
+            $C[] = $i;
+        }
     }
 
     // Fill special distances.
-    for ($i = 1; $i < NUMBER_OF_NODES; ++$i) {
-        $special[$i] = distanceFromTo($adjacentList, 0, $i);
-        if ($special[$i] < INF) {
-            $predecessor[$i] = 0;
+    for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
+        if ($i != INITIAL_NODE) {
+            $special[$i] = distanceFromTo($adjacentList, INITIAL_NODE, $i);
+            if ($special[$i] < INF) {
+                $predecessor[$i] = INITIAL_NODE;
+            } else {
+                $predecessor[$i] = '#';
+            }
         } else {
-            $predecessor[$i] = '#';
+            $special[$i] = 'I';
+            $predecessor[$i] = 'I';
         }
     }
-    echo 'INITIAL> Not used nodes: '.implode('-', $C).PHP_EOL
+    echo 'INITIAL_NODE = '.INITIAL_NODE.PHP_EOL
+        .'INITIAL> Not used nodes: '.implode('-', $C).PHP_EOL
         .'INITIAL> Special: '.implode('-', $special).PHP_EOL
         .'INITIAL> Predecessor: '.implode('-', $predecessor).PHP_EOL;
 
@@ -64,13 +73,14 @@ function selectNextNodeThatMinimizesSpecial($adjacentList, &$C, &$special)
 
     for ($i = 0; $i < NUMBER_OF_NODES; ++$i) {
         foreach ($C as $node) {
-            if (!in_array($i, $C)
-            and isset($adjacentList[$i][$node])
-            and $adjacentList[$i][$node] < $minCost) {
-                echo '>>>> Found min edge! $adjacentList['.$i.']['.$node.']='.$adjacentList[$i][$node].PHP_EOL;
-                $minCost = $adjacentList[$i][$node];
-                $minNode = $node;
-            }
+            //echo $node.' '.$adjacentList[$i][$node].PHP_EOL;
+                if (!in_array($i, $C)
+                and isset($adjacentList[$i][$node])
+                and $adjacentList[$i][$node] < $minCost) {
+                    echo '>>>> Found min edge! $adjacentList['.$i.']['.$node.']='.$adjacentList[$i][$node].PHP_EOL;
+                    $minCost = $adjacentList[$i][$node];
+                    $minNode = $node;
+                }
         }
     }
 

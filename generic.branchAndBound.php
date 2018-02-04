@@ -6,7 +6,7 @@ function ramificacionYPoda($nodoRaiz, $mejorSolucion)
     $cota = estimacionPesimista($nodoRaiz);
     $monticulo->insertar($nodoRaiz);
 
-    while (!esVacio() and estimacionOptimista($monticulo->getPrimero()) <= $cota) {
+    while (!esVacio($monticulo) and estimacionOptimista($monticulo->getPrimero()) <= $cota) {
         $nodo = $monticulo->getCima();
 
         foreach (hijosValidos($nodo) as $hijo) {

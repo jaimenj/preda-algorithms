@@ -1,22 +1,22 @@
 <?php
 
-define(MAX_N, '10000');
+define('MAX_N', 100);
 
 for ($i = 0; $i <= MAX_N; ++$i) {
     $timeStart = microtime(true);
-    $theNumber = fibonnaci($i);
-    //echo 'Fibonnaci('.$i.') = '.$theNumber.PHP_EOL;
+    $theNumber = fibonnaciRecursive($i);
+    //echo 'fibonnaciRecursive('.$i.') = '.$theNumber.PHP_EOL;
     $timeEnd = microtime(true);
-    echo '  DYNAMIC '.$i.': Calculated in '.number_format($timeEnd - $timeStart, 9).' seconds.'.PHP_EOL;
+    echo 'RECURSIVE fibonnaci('.$i.'): Calculated in '.number_format($timeEnd - $timeStart, 9).' seconds.'.PHP_EOL;
 
     $timeStart = microtime(true);
-    $theNumber = fibonnaciRecursive($i);
-    //echo 'Fibonnaci('.$i.') = '.$theNumber.PHP_EOL;
+    $theNumber = fibonnaciDynamic($i);
+    //echo 'fibonnaciDynamic('.$i.') = '.$theNumber.PHP_EOL;
     $timeEnd = microtime(true);
-    echo 'RECURSIVE '.$i.': Calculated in '.number_format($timeEnd - $timeStart, 9).' seconds.'.PHP_EOL;
+    echo '  DYNAMIC fibonnaci('.$i.'): Calculated in '.number_format($timeEnd - $timeStart, 9).' seconds.'.PHP_EOL;
 }
 
-function fibonnaci($n)
+function fibonnaciDynamic($n)
 {
     $tabla = array();
 
@@ -38,6 +38,6 @@ function fibonnaciRecursive($n)
     if ($n <= 1) {
         return 1;
     } else {
-        return fibonnaci($n - 1) + fibonnaci($n - 2);
+        return fibonnaciRecursive($n - 1) + fibonnaciRecursive($n - 2);
     }
 }
